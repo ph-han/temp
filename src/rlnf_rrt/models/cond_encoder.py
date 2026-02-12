@@ -31,11 +31,14 @@ class MapEncoder(nn.Module):
             in_ch = out_ch
 
         self.backbone = nn.Sequential(*layers)
-        self.proj = nn.Linear(channels[-1], latent_dim)
+        self.pool = nn.AdaptiveAvgPool2d((4, 4))
+        self.proj = nn.Linear(channels[-1] * 4 * 4, latent_dim)
 
-    def forward(self, map: torch.Tensor) -> torch.Tensor:
-        x = self.backbone(map)
-        x = x.mean(dim=(2, 3)) # GAP 
+    def forward(self, binary_map: torch.Tensor) -> torch.Tensor:
+        x = self.backbone(binary_map)
+        # x = x.mean(dim=(2, 3)) # GAP 
+        x = self.pool(x)
+        x = torch.flatten(x, 1)
         return self.proj(x)
 
 
