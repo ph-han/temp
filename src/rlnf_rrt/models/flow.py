@@ -16,6 +16,9 @@ class Flow(nn.Module):
         s_max: float = 1.5,
         channels=(32, 48, 64, 96, 128),
         norm: str = "bn",
+        map_scale: float = 1.5,
+        sg_scale: float = 2.0,
+        cond_norm: str = "none",
     ):
         super().__init__()
 
@@ -24,6 +27,9 @@ class Flow(nn.Module):
             latent_dim=latent_dim,
             channels=channels,
             norm=norm,
+            map_scale=map_scale,
+            sg_scale=sg_scale,
+            cond_norm=cond_norm,
         )
         self.cond_dim = latent_dim + 2 * sg_dim
         self.flows = nn.ModuleList([

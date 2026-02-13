@@ -31,6 +31,9 @@ def _build_model_from_ckpt(ckpt: dict, device: torch.device) -> Flow:
         s_max=float(m["s_max"]),
         channels=tuple(int(x) for x in m["channels"]),
         norm=str(m["norm"]),
+        map_scale=float(m.get("map_scale", 1.5)),
+        sg_scale=float(m.get("sg_scale", 2.0)),
+        cond_norm=str(m.get("cond_norm", "none")),
     ).to(device)
     model.load_state_dict(ckpt["model_state_dict"])
     model.eval()
@@ -100,7 +103,9 @@ def main() -> None:
     x = sample["gt_path"].unsqueeze(0).to(device)
 
     with torch.no_grad():
-        cond = model.cond_encoder(map_img, start, goal)
+        start_centered = start * 2.0 - 1.0
+        goal_centered = goal * 2.0 - 1.0
+        cond = model.cond_encoder(map_img, start_centered, goal_centered)
         states: list[np.ndarray] = [x.squeeze(0).cpu().numpy()]
         z = x
         for block in model.flows:

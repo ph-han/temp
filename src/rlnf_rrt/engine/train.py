@@ -127,6 +127,9 @@ def train(config_path: str | Path = "configs/train/default.toml") -> None:
         s_max=float(model_cfg["s_max"]),
         channels=tuple(int(x) for x in model_cfg["channels"]),
         norm=str(model_cfg["norm"]),
+        map_scale=float(model_cfg.get("map_scale", 1.5)),
+        sg_scale=float(model_cfg.get("sg_scale", 2.0)),
+        cond_norm=str(model_cfg.get("cond_norm", "none")),
     ).to(device)
     
     optimizer = AdamW(
