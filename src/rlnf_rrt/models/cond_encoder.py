@@ -31,8 +31,8 @@ class MapEncoder(nn.Module):
             in_ch = out_ch
 
         self.backbone = nn.Sequential(*layers)
-        self.pool = nn.AdaptiveAvgPool2d((4, 4))
-        self.proj = nn.Linear(channels[-1] * 4 * 4, latent_dim)
+        self.pool = nn.AdaptiveAvgPool2d((8, 8))
+        self.proj = nn.Linear(channels[-1] * 8 * 8, latent_dim)
 
     def forward(self, binary_map: torch.Tensor) -> torch.Tensor:
         x = self.backbone(binary_map)

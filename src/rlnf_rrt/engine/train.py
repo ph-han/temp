@@ -67,6 +67,7 @@ def _run_epoch(
 
 
 def train(config_path: str | Path = "configs/train/default.toml") -> None:
+    print(f"train config: {config_path}")
     cfg = load_toml(config_path)
 
     seed = int(cfg["seed"]["value"])
@@ -92,7 +93,7 @@ def train(config_path: str | Path = "configs/train/default.toml") -> None:
     val_ds = RLNFDataset(
         split="val",
         data_root=data_root,
-        noise_std=0.0,
+        noise_std=float(data_cfg.get("noise_std", 0.0)),
         num_points=int(data_cfg["num_points"]),
         clearance=int(data_cfg["clearance"]),
         step_size=int(data_cfg["step_size"]),
