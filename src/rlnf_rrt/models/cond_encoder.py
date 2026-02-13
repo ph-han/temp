@@ -49,25 +49,13 @@ class CondEncoder(nn.Module):
         latent_dim: int = 128,
         channels=(32, 48, 64, 96, 128),
         norm: str = "bn",
-        map_scale: float = 1.5,
-        sg_scale: float = 2.0,
-        cond_norm: str = "none",
     ):
         super().__init__()
 
         self.map_encoder = MapEncoder(latent_dim, channels, norm)
-        self.map_scale = float(map_scale)
-        self.sg_scale = float(sg_scale)
 
         self.sg_dim = sg_dim
-        if cond_norm == "layernorm":
-            self.cond_norm_layer = nn.LayerNorm(latent_dim)
-        elif cond_norm == "none":
-            self.cond_norm_layer = nn.Identity()
-        else:
-            raise ValueError("cond_norm must be 'layernorm' or 'none'.")
 
     def forward(self, map: torch.Tensor, start: torch.Tensor, goal: torch.Tensor) -> torch.Tensor:
         w = self.map_encoder(map)
-        w = self.cond_norm_layer(w)
-        return torch.cat([self.map_scale * w, self.sg_scale * start, self.sg_scale * goal], dim=-1)
+        return torch.cat([w, start, goal], dim=-1)

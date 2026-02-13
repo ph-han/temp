@@ -17,11 +17,11 @@ channels = [32, 48, 64, 96, 128]
 norm = "bn"
 
 [train]
-epochs = 1500
+epochs = 120
 batch_size = 64
 num_workers = 4
-lr = 0.0001
-weight_decay = 0.001
+lr = 0.00005
+weight_decay = 0.003
 grad_clip_norm = 1.0
 log_interval = 5
 pin_memory = true

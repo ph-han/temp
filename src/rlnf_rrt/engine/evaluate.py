@@ -35,9 +35,6 @@ def _build_model_from_ckpt(ckpt: dict, device: torch.device) -> Flow:
         s_max=float(m["s_max"]),
         channels=tuple(int(x) for x in m["channels"]),
         norm=str(m["norm"]),
-        map_scale=float(m.get("map_scale", 1.5)),
-        sg_scale=float(m.get("sg_scale", 2.0)),
-        cond_norm=str(m.get("cond_norm", "none")),
     ).to(device)
     model.load_state_dict(ckpt["model_state_dict"])
     model.eval()

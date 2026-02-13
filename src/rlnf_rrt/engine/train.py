@@ -47,7 +47,11 @@ def _run_epoch(
             optimizer.zero_grad(set_to_none=True)
 
         with torch.set_grad_enabled(is_train):
-            z, log_det = model(map_img, start, goal, gt_path)
+            bsz, t, _ = gt_path.shape
+            idx_t = torch.randint(0, t, (bsz,), device=gt_path.device)
+            x_point = gt_path[torch.arange(bsz, device=gt_path.device), idx_t].unsqueeze(1)  # (B,1,2)
+
+            z, log_det = model(map_img, start, goal, x_point)
             loss = _nll_loss(z, log_det)
 
             if is_train:
@@ -127,9 +131,6 @@ def train(config_path: str | Path = "configs/train/default.toml") -> None:
         s_max=float(model_cfg["s_max"]),
         channels=tuple(int(x) for x in model_cfg["channels"]),
         norm=str(model_cfg["norm"]),
-        map_scale=float(model_cfg.get("map_scale", 1.5)),
-        sg_scale=float(model_cfg.get("sg_scale", 2.0)),
-        cond_norm=str(model_cfg.get("cond_norm", "none")),
     ).to(device)
     
     optimizer = AdamW(
