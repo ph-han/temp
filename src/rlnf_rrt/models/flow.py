@@ -39,7 +39,7 @@ class Flow(nn.Module):
         x_centered = x * 2.0 - 1.0
         start_centered = start * 2.0 - 1.0
         goal_centered = goal * 2.0 - 1.0
-        cond = self.cond_encoder(binary_map, start_centerd, goal_centered)
+        cond = self.cond_encoder(binary_map, start_centered, goal_centered)
         
         tot_log_det = torch.zeros(x.shape[0], device=x.device)
         z = x_centered
