@@ -93,7 +93,7 @@ def main() -> None:
     idx = max(0, min(args.index, len(ds) - 1))
     sample = ds[idx]
 
-    device = get_device()
+    device = torch.device("cpu") # get_device()
     ckpt = torch.load(ckpt_path, map_location=device)
     model = _build_model_from_ckpt(ckpt, device)
 

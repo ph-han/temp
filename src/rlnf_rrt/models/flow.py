@@ -42,13 +42,13 @@ class Flow(nn.Module):
         ])
 
     def forward(self, binary_map: torch.Tensor, start: torch.Tensor, goal: torch.Tensor, x: torch.Tensor):
-        x_centered = x * 2.0 - 1.0
-        start_centered = start * 2.0 - 1.0
-        goal_centered = goal * 2.0 - 1.0
-        cond = self.cond_encoder(binary_map, start_centered, goal_centered)
+        # x_centered = x * 2.0 - 1.0
+        # start_centered = start * 2.0 - 1.0
+        # goal_centered = goal * 2.0 - 1.0
+        cond = self.cond_encoder(binary_map, start, goal)
         
         tot_log_det = torch.zeros(x.shape[0], device=x.device)
-        z = x_centered
+        z = x
         for flow in self.flows:
             z, log_det = flow(z, cond)
             tot_log_det += log_det
@@ -57,18 +57,18 @@ class Flow(nn.Module):
     
     @torch.no_grad()
     def inverse(self, map_img: torch.Tensor, start: torch.Tensor, goal: torch.Tensor, z: torch.Tensor):
-        start_centered = start * 2.0 - 1.0
-        goal_centered = goal * 2.0 - 1.0
-        cond = self.cond_encoder(map_img, start_centered, goal_centered)
+        # start_centered = start * 2.0 - 1.0
+        # goal_centered = goal * 2.0 - 1.0
+        cond = self.cond_encoder(map_img, start, goal)
 
         tot_log_det = z.new_zeros(z.shape[0])
         x = z
         for block in reversed(self.flows):
             x, log_det = block.inverse(x, cond)
             tot_log_det += log_det
-        x_restored = (x + 1.0) / 2.0
-        x_restored = torch.clamp(x_restored, 0.0, 1.0)
-        return x_restored, tot_log_det
+        # x_restored = (x + 1.0) / 2.0
+        # x_restored = torch.clamp(x_restored, 0.0, 1.0)
+        return x, tot_log_det
 
     
         
