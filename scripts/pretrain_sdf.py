@@ -1,6 +1,7 @@
 import os
 import glob
 import math
+import time
 from dataclasses import dataclass
 
 import numpy as np
@@ -10,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
+from tqdm.auto import tqdm
 
 
 # -------------------------
@@ -188,7 +190,7 @@ class SDFPretrainNet(nn.Module):
 
 @dataclass
 class TrainCfg:
-    data_root: str = "data"
+    data_root: str = "data/train"
     batch_size: int = 64
     num_workers: int = 4
     lr: float = 5e-4
@@ -218,10 +220,12 @@ def main():
 
     best = float("inf")
     for ep in range(1, cfg.epochs + 1):
+        ep_start = time.time()
         model.train()
         run = 0.0
         n = 0
-        for map_t, sdf_t in dl:
+        pbar = tqdm(dl, desc=f"ep {ep:03d}/{cfg.epochs:03d}", leave=False)
+        for map_t, sdf_t in pbar:
             map_t = map_t.to(cfg.device, non_blocking=True).float()
             sdf_t = sdf_t.to(cfg.device, non_blocking=True).float()
 
@@ -238,12 +242,20 @@ def main():
 
             run += loss.item()
             n += 1
+            pbar.set_postfix(loss=f"{loss.item():.4f}", avg=f"{(run / n):.4f}")
 
         avg = run / max(1, n)
-        print(f"[ep {ep:03d}/{cfg.epochs}] loss={avg:.6f}")
+        ep_sec = time.time() - ep_start
+        is_best = avg < best
+        tag = " *best*" if is_best else ""
+        print(
+            f"[ep {ep:03d}/{cfg.epochs:03d}] "
+            f"loss={avg:.6f} best={min(best, avg):.6f} "
+            f"steps={n:04d} time={ep_sec:.1f}s{tag}"
+        )
 
         # save best
-        if avg < best:
+        if is_best:
             best = avg
             torch.save(
                 {
