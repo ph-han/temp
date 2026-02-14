@@ -129,10 +129,19 @@ def train(config_path: str | Path = "configs/train/default.toml") -> None:
         norm=str(model_cfg["norm"]),
     ).to(device)
     
+    base_lr = float(train_cfg["lr"])
+    weight_decay = float(train_cfg["weight_decay"])
+    map_encoder_lr_scale = float(train_cfg.get("map_encoder_lr_scale", 0.1))
+
+    map_encoder_params = list(model.cond_encoder.map_encoder.parameters())
+    map_encoder_param_ids = {id(p) for p in map_encoder_params}
+    other_params = [p for p in model.parameters() if id(p) not in map_encoder_param_ids]
+
     optimizer = AdamW(
-        model.parameters(),
-        lr=float(train_cfg["lr"]),
-        weight_decay=float(train_cfg["weight_decay"]),
+        [
+            {"params": other_params, "lr": base_lr, "weight_decay": weight_decay},
+            {"params": map_encoder_params, "lr": base_lr * map_encoder_lr_scale, "weight_decay": weight_decay},
+        ]
     )
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
