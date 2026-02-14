@@ -1,0 +1,33 @@
+[seed]
+value = 42
+
+[data]
+data_root = "data"
+num_points = 128
+clearance = 2
+step_size = 1
+noise_std = 0.03
+
+[model]
+num_blocks = 4
+latent_dim = 128
+hidden_dim = 128
+s_max = 2.0
+channels = [32, 48, 64, 96, 128]
+norm = "gn"
+
+[train]
+epochs = 1500
+batch_size = 64
+num_workers = 4
+lr = 0.00005
+map_encoder_lr_scale = 0.01
+weight_decay = 0.001
+grad_clip_norm = 3.0
+log_interval = 5
+pin_memory = true
+
+[output]
+checkpoint_root = "outputs/checkpoints"
+run_name = ""
+save_last_every_epoch = true
