@@ -17,7 +17,7 @@ channels = [32, 48, 64, 96, 128]
 norm = "bn"
 
 [train]
-epochs = 120
+epochs = 1500
 batch_size = 64
 num_workers = 4
 lr = 0.00005

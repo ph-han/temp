@@ -10,7 +10,7 @@ class STNet(nn.Module):
         cond_dim: int,
         hidden_dim: int = 256,
         s_max: float = 1.5,
-        dropout: float = 0.05,
+        dropout: float = 0.15,
     ):
         super().__init__()
         self.s_max = s_max
