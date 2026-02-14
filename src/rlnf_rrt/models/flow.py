@@ -24,7 +24,9 @@ class Flow(nn.Module):
             latent_dim=latent_dim,
             channels=channels,
             norm=norm,
+            pretrained_backbone="outputs/pretrain/mapencoder_backbone_best.pt",
         )
+
         self.cond_dim = latent_dim + 2 * sg_dim
         self.flows = nn.ModuleList([
             AffineCouplingBlock(
