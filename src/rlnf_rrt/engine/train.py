@@ -47,11 +47,7 @@ def _run_epoch(
             optimizer.zero_grad(set_to_none=True)
 
         with torch.set_grad_enabled(is_train):
-            bsz, t, _ = gt_path.shape
-            idx_t = torch.randint(0, t, (bsz,), device=gt_path.device)
-            x_point = gt_path[torch.arange(bsz, device=gt_path.device), idx_t].unsqueeze(1)  # (B,1,2)
-
-            z, log_det = model(map_img, start, goal, x_point)
+            z, log_det = model(map_img, start, goal, gt_path)
             loss = _nll_loss(z, log_det)
 
             if is_train:

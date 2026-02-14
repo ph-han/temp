@@ -1,31 +1,46 @@
 import torch
 import torch.nn as nn
-
-import torch
-import torch.nn as nn
-
+import torch.nn.functional as F
+from torch.nn.utils import weight_norm
 
 class STNet(nn.Module):
-    def __init__(self, z_keep_dim: int, cond_dim: int, hidden_dim: int = 128, s_max: float = 1.5):
+    def __init__(
+        self,
+        z_keep_dim: int,
+        cond_dim: int,
+        hidden_dim: int = 256,
+        s_max: float = 1.5,
+        dropout: float = 0.05,
+    ):
         super().__init__()
         self.s_max = s_max
         in_dim = z_keep_dim + cond_dim
         out_dim = 2 * z_keep_dim
 
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
-            nn.SiLU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.SiLU(),
-            nn.Linear(hidden_dim, out_dim),
-        )
+        self.fc1 = weight_norm(nn.Linear(in_dim, hidden_dim))
+        self.fc2 = weight_norm(nn.Linear(hidden_dim, hidden_dim))
+        self.fc3 = weight_norm(nn.Linear(hidden_dim, hidden_dim))
+        self.fc4 = weight_norm(nn.Linear(hidden_dim, hidden_dim))
+        self.fc5 = weight_norm(nn.Linear(hidden_dim, out_dim))
+
+        self.drop = nn.Dropout(dropout)
+
+        nn.init.zeros_(self.fc5.weight)
+        nn.init.zeros_(self.fc5.bias)
 
     def forward(self, z_keep: torch.Tensor, cond_bt: torch.Tensor):
         h = torch.cat([z_keep, cond_bt], dim=-1)
-        st = self.net(h)
+
+        h = self.drop(F.silu(self.fc1(h)))  # layer1
+        h = self.drop(F.silu(self.fc2(h)))  # layer2
+        h = self.drop(F.silu(self.fc3(h)))  # layer3
+        h = self.drop(F.silu(self.fc4(h)))  # layer4
+        st = self.fc5(h)                    # layer5 (output)
+
         s_raw, t = st.chunk(2, dim=-1)
         s = self.s_max * torch.tanh(s_raw)
         return s, t
+
 
 
 class AffineCouplingBlock(nn.Module):

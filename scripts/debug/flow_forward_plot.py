@@ -100,9 +100,7 @@ def main() -> None:
     x = sample["gt_path"].unsqueeze(0).to(device)
 
     with torch.no_grad():
-        start_centered = start * 2.0 - 1.0
-        goal_centered = goal * 2.0 - 1.0
-        cond = model.cond_encoder(map_img, start_centered, goal_centered)
+        cond = model.cond_encoder(map_img, start, goal)
         states: list[np.ndarray] = [x.squeeze(0).cpu().numpy()]
         z = x
         for block in model.flows:
