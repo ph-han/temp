@@ -208,7 +208,7 @@ def main():
 
     os.makedirs(cfg.out_dir, exist_ok=True)
 
-    ds = SDFPretrainDataset(cfg.data_root, clip_max=cfg.clip_max)
+    ds = SDFPretrainDataset(cfg.data_root, map_glob="**/map/*.png", clip_max=cfg.clip_max)
     dl = DataLoader(ds, batch_size=cfg.batch_size, shuffle=True,
                     num_workers=cfg.num_workers, pin_memory=True, drop_last=True)
 
